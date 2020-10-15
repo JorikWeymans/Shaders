@@ -14,14 +14,6 @@ BlendState EnableBlending
 	BlendEnable[0] = TRUE;
 	SrcBlend = SRC_ALPHA;
     DestBlend = INV_SRC_ALPHA;
-	//BlendEnable[0] = TRUE;
-	//SrcBlend = SRC_ALPHA;
-    //DestBlend = INV_SRC_ALPHA;
-	//BlendOp = ADD;
-	//SrcBlendAlpha = ONE;
-	//DestBlendAlpha = ZERO;
-	//BlendOpAlpha = ADD;
-	//RenderTargetWriteMask[0] = 0x0f;
 };
 
 DepthStencilState NoDepth
@@ -42,8 +34,8 @@ RasterizerState BackCulling
 struct VS_DATA
 {
 	uint TextureId: TEXCOORD0;
-	float4 TransformData : POSITION; //PosX, PosY, Depth (PosZ), Rotation
-	float4 TransformData2 : POSITION1; //PivotX, PivotY, ScaleX, ScaleY
+	float4 TransformData : POSITION;
+	float4 TransformData2 : POSITION1;
 	float4 Color: COLOR;	
 };
 
@@ -68,27 +60,18 @@ void CreateVertex(inout TriangleStream<GS_DATA> triStream, float3 pos, float4 co
 	
 	if (rotation != 0)
 	{
-		//Step 3.
-		//Do rotation calculations
-		//Transform to origin
-		//Rotate
 		pos.xy -= (offset + pivotOffset);
 		float2 newPos = float2((pos.x * rotCosSin.x) - (pos.y * rotCosSin.y), (pos.x * rotCosSin.y) + (pos.y * rotCosSin.x));
 		pos.xy = newPos;
-		//Retransform to initial position
 		pos.xy += offset;
 	}
 	else
 	{
-		//Step 2.
-		//No rotation calculations (no need to do the rotation calculations if there is no rotation applied > redundant operations)
-		//Just apply the pivot offset
-		//pos.xy -= (offset + pivotOffset);
 		pos.x -= pivotOffset.x ;
 		pos.y -= pivotOffset.y ;
 
 	}
-	//Geometry Vertex Output
+
 	GS_DATA geomData = (GS_DATA) 0;
 	geomData.Position = mul(float4(pos, 1.0f), gTransform);
 	geomData.Color = col;
@@ -101,12 +84,12 @@ void CreateVertex(inout TriangleStream<GS_DATA> triStream, float3 pos, float4 co
 void MainGS(point VS_DATA vertex[1], inout TriangleStream<GS_DATA> triStream)
 {
 	//Given Data (Vertex Data)
-	float3 position = vertex[0].TransformData.xyz; //Extract the position data from the VS_DATA vertex struct
-	float2 offset = vertex[0].TransformData.xy;//Extract the offset data from the VS_DATA vertex struct (initial X and Y position)
-	float rotation = vertex[0].TransformData.w; //Extract the rotation data from the VS_DATA vertex struct
-	float2 pivot = vertex[0].TransformData2.xy; //Extract the pivot data from the VS_DATA vertex struct
-	float2 scale = vertex[0].TransformData2.zw; //Extract the scale data from the VS_DATA vertex struct
-	float2 texCoord = float2(0, 0); //Initial Texture Coordinate
+	float3 position = vertex[0].TransformData.xyz; 
+	float2 offset = vertex[0].TransformData.xy;
+	float rotation = vertex[0].TransformData.w;
+	float2 pivot = vertex[0].TransformData2.xy;
+	float2 scale = vertex[0].TransformData2.zw; 
+	float2 texCoord = float2(0, 0); 
 
 	pivot.x *= gTextureSize.x * scale.x;
 	pivot.y *= gTextureSize.y * scale.y;
@@ -117,30 +100,20 @@ void MainGS(point VS_DATA vertex[1], inout TriangleStream<GS_DATA> triStream)
 		rotCosSin.x = cos(rotation);
 		rotCosSin.y = sin(rotation);
 	}
-	// LT----------RT //TringleStrip (LT > RT > LB, LB > RB > RT)
-	// |          / |
-	// |       /    |
-	// |    /       |
-	// | /          |
-	// LB----------RB
 
-	//VERTEX 1 [LT]
-	CreateVertex(triStream, position, vertex[0].Color, texCoord, rotation, rotCosSin, offset, pivot); //Change the color data too!
+	CreateVertex(triStream, position, vertex[0].Color, texCoord, rotation, rotCosSin, offset, pivot);
 
-	//VERTEX 2 [RT]
 	position += float3(gTextureSize.x * scale.x, 0.0f, 0.0f);
 	texCoord = float2(1, 0);
-	CreateVertex(triStream, position, vertex[0].Color, texCoord, rotation, rotCosSin, offset, pivot); //Change the color data too!
+	CreateVertex(triStream, position, vertex[0].Color, texCoord, rotation, rotCosSin, offset, pivot);
 
-	//VERTEX 3 [LB]
 	position += float3(-gTextureSize.x * scale.x, gTextureSize.y * scale.y, 0.f);
 	texCoord = float2(0, 1);
-	CreateVertex(triStream, position, vertex[0].Color, texCoord, rotation, rotCosSin, offset, pivot); //Change the color data too!
+	CreateVertex(triStream, position, vertex[0].Color, texCoord, rotation, rotCosSin, offset, pivot); 
 
-	//VERTEX 4 [RB]
 	position += float3(gTextureSize.x * scale.x, 0.f, 0.f);
 	texCoord = float2(1, 1);
-	CreateVertex(triStream, position, vertex[0].Color, texCoord, rotation, rotCosSin, offset, pivot); //Change the color data too!
+	CreateVertex(triStream, position, vertex[0].Color, texCoord, rotation, rotCosSin, offset, pivot);
 }
 
 //PIXEL SHADER
@@ -151,7 +124,7 @@ float4 MainPS(GS_DATA input) : SV_TARGET {
 }
 
 // Default Technique
-technique11 Default {
+technique11 TechSpriteRenderer {
 
 	pass p0 {
 		SetVertexShader(CompileShader(vs_4_0, MainVS()));

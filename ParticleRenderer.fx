@@ -63,53 +63,35 @@ VS_DATA MainVS(VS_DATA input)
 //***************
 void CreateVertex(inout TriangleStream<GS_DATA> triStream, float3 pos, float2 texCoord, float4 col, float2x2 uvRotation)
 {
-	//Step 1. Create a GS_DATA object
 	GS_DATA data = (GS_DATA)0;
-	//Step 2. Transform the position using the WVP Matrix and assign it to (GS_DATA object).Position (Keep in mind: float3 -> float4, Homogeneous Coordinates)
 	data.Position = mul(float4(pos,1.0f), gWorldViewProj );
-	
-	//Step 3. Assign texCoord to (GS_DATA object).TexCoord
-		//This is a little formula to do texture rotation by transforming the texture coordinates (Can cause artifacts)
-		data.TexCoord = texCoord;
-		//texCoord -= float2(0.5f,0.5f);
-		//texCoord = mul(texCoord, uvRotation);
-		//data.TexCoord -= float2(0.5f,0.5f);
-		//data.TexCoord = mul(texCoord, uvRotation);
-		//texCoord += float2(0.5f,0.5f);*/
-		//data.TexCoord += float2(0.5f,0.5f);
-		
-	//Step 4. Assign color to (GS_DATA object).Color
+	data.TexCoord = texCoord;
 	data.Color = col;
-	//Step 5. Append (GS_DATA object) to the TriangleStream parameter (TriangleStream::Append(...))
+
 	triStream.Append(data); 
 }
 
 [maxvertexcount(4)]
 void MainGS(point VS_DATA vertex[1], inout TriangleStream<GS_DATA> triStream)
 {
-	//Use these variable names
 	float3 topLeft, topRight, bottomLeft, bottomRight;
 	float size = vertex[0].Size;
 	float3 origin = vertex[0].Position;
 
-	//Vertices (Keep in mind that 'origin' contains the center of the quad
 	topLeft = float3(-size / 2 , size / 2,0);
 	topRight = float3(size / 2 , size / 2, 0);
 	bottomLeft = float3(- size / 2 , - size / 2, 0);
 	bottomRight = float3(size / 2 ,  - size / 2, 0);
 	
-	
 
-	//Transform the vertices using the ViewInverse (Rotational Part Only!!! (~ normal transformation)), this will force them to always point towards the camera (cfr. BillBoarding)
 	topLeft = origin + (mul(float4(topLeft,0.f),gViewInverse).xyz);
 	topRight = origin + (mul(float4(topRight,0.f),gViewInverse).xyz);
 	bottomLeft = origin + (mul(float4(bottomLeft,0.f),gViewInverse).xyz);
 	bottomRight = origin + (mul(float4(bottomRight,0.f),gViewInverse).xyz);
 
-	//This is the 2x2 rotation matrix we need to transform our TextureCoordinates (Texture Rotation)
+
 	float2x2 uvRotation = {cos(vertex[0].Rotation), - sin(vertex[0].Rotation), sin(vertex[0].Rotation), cos(vertex[0].Rotation)};
 	
-	//Create Geometry (Trianglestrip)
 	CreateVertex(triStream,bottomLeft, float2(0,1), vertex[0].Color, uvRotation);
 	CreateVertex(triStream,topLeft, float2(0,0), vertex[0].Color, uvRotation);
 	CreateVertex(triStream,bottomRight, float2(1,1), vertex[0].Color, uvRotation);
@@ -126,7 +108,7 @@ float4 MainPS(GS_DATA input) : SV_TARGET {
 }
 
 // Default Technique
-technique10 Default {
+technique10 techParticleRenderer {
 
 	pass p0 {
 		SetVertexShader(CompileShader(vs_4_0, MainVS()));

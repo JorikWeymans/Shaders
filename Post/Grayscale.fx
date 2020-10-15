@@ -10,12 +10,11 @@ SamplerState samPoint
 
 Texture2D gTexture;
 
-/// Create Depth Stencil State (ENABLE DEPTH WRITING)
 DepthStencilState depthStencilState
 {
 	DepthEnable = TRUE;
 };
-/// Create Rasterizer State (Backface culling) 
+
 RasterizerState BackCulling
 {
 	CullMode = BACK;
@@ -42,10 +41,9 @@ struct PS_INPUT
 PS_INPUT VS(VS_INPUT input)
 {
 	PS_INPUT output = (PS_INPUT)0;
-	// Set the Position1
+
 	output.Position = float4(input.Position, 1.f);
 
-	// Set the TexCoord
 	output.TexCoord = input.TexCoord;
 	return output;
 }
@@ -55,13 +53,11 @@ PS_INPUT VS(VS_INPUT input)
 //------------
 float4 PS(PS_INPUT input): SV_Target
 {
-    // Step 1: sample the texture
 	float3 color = gTexture.Sample(samPoint, input.TexCoord);
-	// Step 2: calculate the mean value
+
 	float grayscale = (color.x + color.y + color.z )/ 3;
-	// Step 3: return the color
+
 	return float4( grayscale, grayscale, grayscale, 1.0f );
-	
 	//sepia
     return float4( grayscale * 1.02, grayscale * .56, grayscale * .1f, 1.0f );
 }
@@ -69,11 +65,10 @@ float4 PS(PS_INPUT input): SV_Target
 
 //TECHNIQUE
 //---------
-technique11 Grayscale
+technique11 TechGrayscale
 {
     pass P0
     {          
-        // Set states...
 		SetDepthStencilState(depthStencilState, 0);
 		SetVertexShader( CompileShader( vs_4_0, VS() ) );
 		SetRasterizerState(BackCulling);    

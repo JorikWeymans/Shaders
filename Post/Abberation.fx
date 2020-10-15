@@ -42,10 +42,8 @@ struct PS_INPUT
 PS_INPUT VS(VS_INPUT input)
 {
 	PS_INPUT output = (PS_INPUT)0;
-	// Set the Position1
 	output.Position = float4(input.Position, 1.f);
 
-	// Set the TexCoord
 	output.TexCoord = input.TexCoord;
 	return output;
 }
@@ -55,7 +53,7 @@ float4 PS(PS_INPUT input): SV_Target
 {
 	if(!gEnabled) return  float4(gTexture.Sample(samPoint,input.TexCoord).xyz, 1.0f);
 	
-	float realAbAmount = gAberationAmount * 0.001; //using this so it is more easy to control
+	float realAbAmount = gAberationAmount * 0.001;
 	float4 abColor;
 	float2 texCoordOffset = input.TexCoord;
 	
@@ -76,11 +74,10 @@ float4 PS(PS_INPUT input): SV_Target
 
 //TECHNIQUE
 //---------
-technique11 Blur
+technique11 TechniqueAbberation
 {
     pass P0
     {
-		// Set states...
 		SetDepthStencilState(depthStencilState, 0);
         SetVertexShader( CompileShader( vs_4_0, VS() ) );
 		SetRasterizerState(BackCulling);  

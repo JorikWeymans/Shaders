@@ -10,15 +10,15 @@ Texture2D gShadowMap;
 SamplerState samLinear
 {
     Filter = MIN_MAG_MIP_LINEAR;
-    AddressU = Wrap;// or Mirror or Clamp or Border
-    AddressV = Wrap;// or Mirror or Clamp or Border
+    AddressU = Wrap;
+    AddressV = Wrap;
 };
 
 SamplerState samPoint
 {
 	Filter = MIN_MAG_MIP_POINT;
-	AddressU = Wrap;// or Mirror or Clamp or Border
-	AddressV = Wrap;// or Mirror or Clamp or Border
+	AddressU = Wrap;
+	AddressV = Wrap;
 };
 
 SamplerComparisonState cmpSampler
@@ -71,8 +71,6 @@ VS_OUTPUT VS(VS_INPUT input)
 {
 	VS_OUTPUT output = (VS_OUTPUT)0;
 	
-	//TODO: complete Vertex Shader
-	//Hint: Don't forget to project our position to light clip space and store it in lPos
 	output.pos = mul(float4(input.pos, 1.0f), gWorldViewProj);
 	output.normal = normalize(mul(input.normal, (float3x3)gWorld));
 	output.texCoord = input.texCoord;
@@ -84,7 +82,6 @@ VS_OUTPUT VS(VS_INPUT input)
 
 float2 texOffset(int u, int v)
 {
-	//TODO: return offseted value (our shadow map has the following dimensions: 1280 * 720)
 	return float2(u * 1.0f / 1280, v * 1.0f / 720);
 }
 
@@ -94,19 +91,15 @@ float EvaluateShadowMap(float4 lpos)
 	
 	if( lpos.x < -1.0f || lpos.x > 1.0f ||
         lpos.y < -1.0f || lpos.y > 1.0f ||
-        lpos.z < 0.0f  || lpos.z > 1.0f ) return 1.0f; // return ambient out of light frustrum
+        lpos.z < 0.0f  || lpos.z > 1.0f ) return 1.0f;
 		
-	//clip space to texture space
 	lpos.x = lpos.x/2 + 0.5;
     lpos.y = lpos.y/-2 + 0.5;
 	
-	////shadowMapBias	
 	lpos.z -= gShadowMapBias;
-	//
-	////PCF sampling for shadow map
+
 	float sum = 0;
-	//
-	////perform PCF filtering on a 4 x 4 texel neighborhood
+
     for (float y = -1.5; y <= 1.5; y += 1.0)
     {
         for (float x = -1.5; x <= 1.5; x += 1.0)
@@ -116,8 +109,7 @@ float EvaluateShadowMap(float4 lpos)
     }
 	
 	float shadowFactor = sum / 16.0;
-	//float shadowFactor = gShadowMap.Sample(samPoint, lpos.xy).r;
-	//"seetrough"
+
 	if (shadowFactor < lpos.z) shadowFactor = .15f;
 	return shadowFactor;
 }
@@ -133,7 +125,7 @@ float4 PS(VS_OUTPUT input) : SV_TARGET
 	float3 color_rgb= diffuseColor.rgb;
 	float color_a = diffuseColor.a;
 	
-	//HalfLambert Diffuse :)
+	
 	float diffuseStrength = dot(input.normal, -gLightDirection);
 	diffuseStrength = diffuseStrength * 0.5 + 0.5;
 	diffuseStrength = saturate(diffuseStrength);

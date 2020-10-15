@@ -36,10 +36,8 @@ struct VS_OUT
 VS_OUT VS( VS_IN vIn )
 {
 	VS_OUT vOut = (VS_OUT)0;
-	// set z = w so that z/w = 1 (i.e., skydome always on far plane).
 	vOut.posH = mul(float4(vIn.posL,0.0f), matWorldViewProj).xyww;
 	vOut.posH.z = vOut.posH.w;
-	// use local vertex position as cubemap lookup vector
 	vOut.texC = (vIn.posL);
 	
 	return vOut;
@@ -55,7 +53,7 @@ float4 PS( VS_OUT pIn): SV_Target
 	return float4(color, 1.0f);
 }
 
-technique10 Render
+technique10 TechSkyBox
 {
     pass P0
     {

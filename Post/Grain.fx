@@ -12,12 +12,12 @@ Texture2D gTexture;
 float gStrength = 16.f;
 float gTime = 1.0f;
 bool gEnabled = true;
-/// Create Depth Stencil State (ENABLE DEPTH WRITING)
+
 DepthStencilState depthStencilState
 {
 	DepthEnable = TRUE;
 };
-/// Create Rasterizer State (Backface culling) 
+
 RasterizerState BackCulling
 {
 	CullMode = BACK;
@@ -34,7 +34,6 @@ struct PS_INPUT
 {
     float4 Position : SV_POSITION;
 	float2 TexCoord : TEXCOORD1;
-	//uint id : SV_VertexID;
 };
 
 
@@ -43,10 +42,9 @@ struct PS_INPUT
 PS_INPUT VS(VS_INPUT input)
 {
 	PS_INPUT output = (PS_INPUT)0;
-	// Set the Position1
+
 	output.Position = float4(input.Position, 1.f);
 
-	// Set the TexCoord
 	output.TexCoord = input.TexCoord;
 	return output;
 }
@@ -73,7 +71,7 @@ float4 PS(PS_INPUT input): SV_Target
 
 //TECHNIQUE
 //---------
-technique11 Blur
+technique11 TechGrain
 {
     pass P0
     {
